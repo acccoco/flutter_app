@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -56,6 +57,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _words = "invalid str";
 
   void _incrementCounter() {
     setState(() {
@@ -66,6 +68,18 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  void _makeRequest() async {
+    var url = Uri.parse('http://127.0.0.1:3030/hello/flutter');
+    var response = await http.get(url);
+    if (response.statusCode == 200) {
+      setState(() {
+        _words = response.body;
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 
   @override
@@ -112,11 +126,15 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            Text(_words)
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {
+          _incrementCounter();
+          _makeRequest();
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
